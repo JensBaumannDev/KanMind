@@ -28,6 +28,9 @@ local_settings.py
 *.swp
 *.swo
 
+# AI tooling
+.claude/
+
 # OS
 .DS_Store
 Thumbs.db
