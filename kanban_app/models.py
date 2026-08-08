@@ -8,6 +8,13 @@ class Board(models.Model):
     title = models.CharField(max_length=250)
     members = models.ManyToManyField(User)
 
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        verbose_name = "Board"
+        ordering = ["title"]
+
 
 class Task(models.Model):
     STATUS_CHOICES = [
@@ -29,12 +36,27 @@ class Task(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES)
     priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES)
     assignee = models.ForeignKey(
-        User, on_delete=models.CASCADE, null=True, blank=True, related_name="assigned_tasks"
+        User,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="assigned_tasks",
     )
     reviewer = models.ForeignKey(
-        User, on_delete=models.CASCADE, null=True, blank=True, related_name="reviewer_tasks"
+        User,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="reviewer_tasks",
     )
     due_date = models.DateField(auto_now=False, auto_now_add=False)
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        verbose_name = "Task"
+        ordering = ["due_date"]
 
 
 class Comment(models.Model):
@@ -42,3 +64,10 @@ class Comment(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now=False, auto_now_add=True)
     content = models.CharField(max_length=300)
+
+    def __str__(self):
+        return f"{self.author},{self.content}"
+
+    class Meta:
+        verbose_name = "Comment"
+        ordering = ["created_at"]
