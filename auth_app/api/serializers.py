@@ -39,6 +39,13 @@ class RegistrationSerializer(serializers.ModelSerializer):
             last_name=last_name,
         )
 
+    def validate_fullname(self, value):
+        if " " not in value:
+            raise serializers.ValidationError(
+                "Fullname must contain at least a first and last name."
+            )
+        return value
+
 
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
@@ -48,7 +55,9 @@ class LoginSerializer(serializers.Serializer):
         email = data.get("email")
         password = data.get("password")
 
-        user = authenticate(request=self.context.get("request"), username=email, password=password)
+        user = authenticate(
+            request=self.context.get("request"), username=email, password=password
+        )
 
         if not user:
             raise serializers.ValidationError("Invalid email or password.")
