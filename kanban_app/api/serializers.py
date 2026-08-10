@@ -14,6 +14,7 @@ class BoardSerializer(serializers.ModelSerializer):
             "ticket_count",
             "tasks_to_do_count",
             "tasks_high_prio_count",
+            "owner_id",
         ]
 
     member_count = serializers.SerializerMethodField()
@@ -35,3 +36,5 @@ class BoardSerializer(serializers.ModelSerializer):
 
     def get_tasks_high_prio_count(self, obj):
         return obj.task_set.filter(priority="high").count()
+    
+    owner_id = serializers.IntegerField(read_only=True)
