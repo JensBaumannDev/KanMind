@@ -1,12 +1,22 @@
 from rest_framework import viewsets
-from kanban_app.models import Board
+from kanban_app.models import Board, Task
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from django.contrib.auth.models import User
 from rest_framework.response import Response
 from django.db.models import Q
-from .serializers import BoardSerializer, BoardDetailSerializer, BoardUpdateSerializer
-from .permissions import IsBoardMember, IsBoardOwner
+from .serializers import (
+    BoardSerializer,
+    BoardDetailSerializer,
+    BoardUpdateSerializer,
+    TaskSerializer,
+)
+from .permissions import (
+    IsBoardMember,
+    IsBoardOwner,
+    IsBoardMemberForTask,
+    CanDeleteTask,
+)
 
 
 class BoardViewSet(viewsets.ModelViewSet):
@@ -46,3 +56,16 @@ class EmailCheckView(APIView):
             )
         else:
             return Response({"detail": "Email not found."}, status=404)
+
+
+class TaskViewSet(viewsets.ModelViewSet):
+    serializer_class = TaskSerializer
+    queryset = Task.objects.all()
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+
+    def get_permissions(self):
+        if self.action == "destroy":
+            return [IsAuthenticated(), CanDeleteTask()]
+        return [IsAuthenticated(), IsBoardMemberForTask()]
