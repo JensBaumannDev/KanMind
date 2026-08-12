@@ -5,13 +5,12 @@ from rest_framework.views import APIView
 from django.contrib.auth.models import User
 from rest_framework.response import Response
 from django.db.models import Q
-from .serializers import BoardSerializer
-from .permissions import IsBoardMember
+from .serializers import BoardSerializer, BoardDetailSerializer, BoardUpdateSerializer
+from .permissions import IsBoardMember, IsBoardOwner
 
 
 class BoardViewSet(viewsets.ModelViewSet):
     serializer_class = BoardSerializer
-    permission_classes = [IsAuthenticated, IsBoardMember]
 
     def get_queryset(self):
         return Board.objects.filter(
@@ -20,6 +19,18 @@ class BoardViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+
+    def get_serializer_class(self):
+        if self.action == "retrieve":
+            return BoardDetailSerializer
+        if self.action == "update" or self.action == "partial_update":
+            return BoardUpdateSerializer
+        return BoardSerializer
+
+    def get_permissions(self):
+        if self.action == "destroy":
+            return [IsAuthenticated(), IsBoardOwner()]
+        return [IsAuthenticated(), IsBoardMember()]
 
 
 class EmailCheckView(APIView):
