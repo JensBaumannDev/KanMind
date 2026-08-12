@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from kanban_app.models import Board
+from kanban_app.models import Board, Task
+from django.contrib.auth.models import User
 
 
 class BoardSerializer(serializers.ModelSerializer):
@@ -16,6 +17,7 @@ class BoardSerializer(serializers.ModelSerializer):
             "tasks_high_prio_count",
             "owner_id",
         ]
+        extra_kwargs = {"members": {"write_only": True}}
 
     member_count = serializers.SerializerMethodField()
 
@@ -36,5 +38,80 @@ class BoardSerializer(serializers.ModelSerializer):
 
     def get_tasks_high_prio_count(self, obj):
         return obj.tasks.filter(priority="high").count()
-    
+
     owner_id = serializers.IntegerField(read_only=True)
+
+
+class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = [
+            "id",
+            "email",
+            "fullname",
+        ]
+
+    fullname = serializers.SerializerMethodField()
+
+    def get_fullname(self, obj):
+        return obj.get_full_name()
+
+
+class TaskSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Task
+        fields = [
+            "id",
+            "board",
+            "title",
+            "description",
+            "status",
+            "priority",
+            "assignee",
+            "reviewer",
+            "due_date",
+            "comments_count",
+        ]
+
+    assignee = UserSerializer(read_only=True)
+    reviewer = UserSerializer(read_only=True)
+    comments_count = serializers.SerializerMethodField()
+
+    def get_comments_count(self, obj):
+        return obj.comments.count()
+
+
+class BoardDetailSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Board
+        fields = [
+            "id",
+            "title",
+            "owner_id",
+            "members",
+            "tasks",
+        ]
+
+    members = UserSerializer(many=True, read_only=True)
+    tasks = TaskSerializer(many=True, read_only=True)
+    owner_id = serializers.IntegerField(read_only=True)
+
+
+class BoardUpdateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Board
+        fields = [
+            "id",
+            "title",
+            "members",
+            "members_data",
+            "owner_data",
+        ]
+        extra_kwargs = {"members": {"write_only": True}}
+
+    owner_data = UserSerializer(source="owner", read_only=True)
+    members_data = UserSerializer(source="members", many=True, read_only=True)
