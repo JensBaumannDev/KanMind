@@ -70,7 +70,9 @@ class TaskSerializer(serializers.ModelSerializer):
             "status",
             "priority",
             "assignee",
+            "assignee_id",
             "reviewer",
+            "reviewer_id",
             "due_date",
             "comments_count",
         ]
@@ -81,6 +83,35 @@ class TaskSerializer(serializers.ModelSerializer):
 
     def get_comments_count(self, obj):
         return obj.comments.count()
+
+    def validate(self, attrs):
+        board = attrs.get("board") or (self.instance.board if self.instance else None)
+        assignee = attrs.get("assignee")
+        reviewer = attrs.get("reviewer")
+
+        if assignee and assignee not in board.members.all() and assignee != board.owner:
+            raise serializers.ValidationError("Assignee must be a board member.")
+        if reviewer and reviewer not in board.members.all() and reviewer != board.owner:
+            raise serializers.ValidationError("Reviewer must be a board member.")
+        if self.instance and "board" in attrs and attrs["board"] != self.instance.board:
+            raise serializers.ValidationError("Board cannot be changed.")
+        return attrs
+
+    assignee_id = serializers.PrimaryKeyRelatedField(
+        source="assignee",
+        queryset=User.objects.all(),
+        write_only=True,
+        required=False,
+        allow_null=True,
+    )
+
+    reviewer_id = serializers.PrimaryKeyRelatedField(
+        source="reviewer",
+        queryset=User.objects.all(),
+        write_only=True,
+        required=False,
+        allow_null=True,
+    )
 
 
 class BoardDetailSerializer(serializers.ModelSerializer):
