@@ -1,4 +1,4 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, generics
 from kanban_app.models import Board, Task
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
@@ -69,3 +69,19 @@ class TaskViewSet(viewsets.ModelViewSet):
         if self.action == "destroy":
             return [IsAuthenticated(), CanDeleteTask()]
         return [IsAuthenticated(), IsBoardMemberForTask()]
+
+
+class AssignedToMeView(generics.ListAPIView):
+    serializer_class = TaskSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Task.objects.filter(assignee=self.request.user)
+
+
+class ReviewingView(generics.ListAPIView):
+    serializer_class = TaskSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Task.objects.filter(reviewer=self.request.user)
