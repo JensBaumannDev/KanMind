@@ -1,5 +1,5 @@
 from rest_framework import viewsets, generics
-from kanban_app.models import Board, Task
+from kanban_app.models import Board, Task, Comment
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from django.contrib.auth.models import User
@@ -10,12 +10,15 @@ from .serializers import (
     BoardDetailSerializer,
     BoardUpdateSerializer,
     TaskSerializer,
+    CommentSerializer,
 )
 from .permissions import (
     IsBoardMember,
     IsBoardOwner,
     IsBoardMemberForTask,
     CanDeleteTask,
+    IsBoardMemberForComment,
+    IsCommentAuthor,
 )
 
 
@@ -85,3 +88,20 @@ class ReviewingView(generics.ListAPIView):
 
     def get_queryset(self):
         return Task.objects.filter(reviewer=self.request.user)
+
+
+class CommentListCreateView(generics.ListCreateAPIView):
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated, IsBoardMemberForComment]
+
+    def get_queryset(self):
+        return Comment.objects.filter(task_id=self.kwargs["task_id"])
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user, task_id=self.kwargs["task_id"])
+
+
+class CommentDeleteView(generics.DestroyAPIView):
+    queryset = Comment.objects.all()
+    permission_classes = [IsAuthenticated, IsCommentAuthor]
+    lookup_url_kwarg = "comment_id"
