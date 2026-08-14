@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from kanban_app.models import Board, Task
+from kanban_app.models import Board, Task, Comment
 from django.contrib.auth.models import User
 
 
@@ -146,3 +146,15 @@ class BoardUpdateSerializer(serializers.ModelSerializer):
 
     owner_data = UserSerializer(source="owner", read_only=True)
     members_data = UserSerializer(source="members", many=True, read_only=True)
+
+
+class CommentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Comment
+        fields = ["id", "created_at", "author", "content"]
+
+    author = serializers.SerializerMethodField()
+
+    def get_author(self, obj):
+        return obj.author.get_full_name()
