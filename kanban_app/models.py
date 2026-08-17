@@ -1,10 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-# Create your models here.
-
 
 class Board(models.Model):
+    """A kanban board with an owner and a set of members who can see its tasks."""
+
     title = models.CharField(max_length=250)
     members = models.ManyToManyField(User)
     owner = models.ForeignKey(
@@ -20,6 +20,8 @@ class Board(models.Model):
 
 
 class Task(models.Model):
+    """A task on a board, optionally assigned to one member and reviewed by another."""
+
     STATUS_CHOICES = [
         ("to-do", "To Do"),
         ("in-progress", "In Progress"),
@@ -66,6 +68,8 @@ class Task(models.Model):
 
 
 class Comment(models.Model):
+    """A single comment left by a user on a task."""
+
     task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="comments")
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="authored_comments"
