@@ -31,14 +31,17 @@ class BoardViewSet(viewsets.ModelViewSet):
     queryset = Board.objects.all()
 
     def get_queryset(self):
+        """Restrict boards to ones the requesting user owns or is a member of."""
         return Board.objects.filter(
             Q(members__id=self.request.user.id) | Q(owner__id=self.request.user.id)
         )
 
     def perform_create(self, serializer):
+        """Set the requesting user as the board's owner."""
         serializer.save(owner=self.request.user)
 
     def get_serializer_class(self):
+        """Use a richer serializer for retrieve/update than for list/create."""
         if self.action == "retrieve":
             return BoardDetailSerializer
         if self.action == "update" or self.action == "partial_update":
@@ -46,6 +49,7 @@ class BoardViewSet(viewsets.ModelViewSet):
         return BoardSerializer
 
     def get_permissions(self):
+        """Only the owner may delete a board; any member may do everything else."""
         if self.action == "destroy":
             return [IsAuthenticated(), IsBoardOwner()]
         return [IsAuthenticated(), IsBoardMember()]
@@ -57,6 +61,7 @@ class EmailCheckView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        """Return the matching user, or 404 if no user has that email."""
         email = request.query_params.get("email")
         user = User.objects.filter(email=email).first()
 
@@ -75,9 +80,11 @@ class TaskViewSet(viewsets.ModelViewSet):
     queryset = Task.objects.all()
 
     def perform_create(self, serializer):
+        """Record the requesting user as the task's creator."""
         serializer.save(created_by=self.request.user)
 
     def get_permissions(self):
+        """Only the creator or the board owner may delete a task."""
         if self.action == "destroy":
             return [IsAuthenticated(), CanDeleteTask()]
         return [IsAuthenticated(), IsBoardMemberForTask()]
@@ -90,6 +97,7 @@ class AssignedToMeView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        """Restrict tasks to ones assigned to the requesting user."""
         return Task.objects.filter(assignee=self.request.user)
 
 
@@ -100,6 +108,7 @@ class ReviewingView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        """Restrict tasks to ones the requesting user is reviewing."""
         return Task.objects.filter(reviewer=self.request.user)
 
 
@@ -110,9 +119,11 @@ class CommentListCreateView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated, IsBoardMemberForComment]
 
     def get_queryset(self):
+        """Restrict comments to the task identified in the URL."""
         return Comment.objects.filter(task_id=self.kwargs["task_id"])
 
     def perform_create(self, serializer):
+        """Set the comment's author and task from the request user and URL."""
         serializer.save(author=self.request.user, task_id=self.kwargs["task_id"])
 
 

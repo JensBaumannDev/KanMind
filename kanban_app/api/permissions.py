@@ -26,6 +26,7 @@ class IsBoardMemberForTask(BasePermission):
     """Require board membership: from request data on create, from the task's board otherwise."""
 
     def has_permission(self, request, view):
+        """On create, require membership of the board named in the request body."""
         if view.action != "create":
             return True
 
@@ -36,6 +37,7 @@ class IsBoardMemberForTask(BasePermission):
         return request.user in board.members.all() or request.user == board.owner
 
     def has_object_permission(self, request, view, obj):
+        """On update, require membership of the task's existing board."""
         if request.user in obj.board.members.all() or request.user == obj.board.owner:
             return True
         return False
