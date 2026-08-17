@@ -1,5 +1,6 @@
 from rest_framework.exceptions import NotFound
 from rest_framework.permissions import BasePermission
+
 from kanban_app.models import Board, Task
 
 
