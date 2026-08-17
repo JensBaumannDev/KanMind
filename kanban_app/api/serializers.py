@@ -5,6 +5,7 @@ from kanban_app.models import Board, Comment, Task
 
 
 class BoardSerializer(serializers.ModelSerializer):
+    """Board representation for list/create: counts only, members is write-only."""
 
     class Meta:
         model = Board
@@ -44,6 +45,7 @@ class BoardSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    """Compact user representation: id, email, fullname."""
 
     class Meta:
         model = User
@@ -60,6 +62,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class TaskSerializer(serializers.ModelSerializer):
+    """Task representation: nested assignee/reviewer for reading, *_id fields for writing."""
 
     class Meta:
         model = Task
@@ -86,6 +89,7 @@ class TaskSerializer(serializers.ModelSerializer):
         return obj.comments.count()
 
     def validate(self, attrs):
+        """Assignee/reviewer must be board members, and board can't change on update."""
         board = attrs.get("board") or (self.instance.board if self.instance else None)
         assignee = attrs.get("assignee")
         reviewer = attrs.get("reviewer")
@@ -116,6 +120,7 @@ class TaskSerializer(serializers.ModelSerializer):
 
 
 class BoardDetailSerializer(serializers.ModelSerializer):
+    """Board representation for retrieve: nested members and tasks."""
 
     class Meta:
         model = Board
@@ -133,6 +138,7 @@ class BoardDetailSerializer(serializers.ModelSerializer):
 
 
 class BoardUpdateSerializer(serializers.ModelSerializer):
+    """Board representation for partial update: owner/members as nested read-only data."""
 
     class Meta:
         model = Board
@@ -150,6 +156,7 @@ class BoardUpdateSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    """Comment representation; author is exposed as a plain full-name string."""
 
     class Meta:
         model = Comment

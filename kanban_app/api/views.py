@@ -25,6 +25,8 @@ from .serializers import (
 
 
 class BoardViewSet(viewsets.ModelViewSet):
+    """CRUD for boards the requesting user owns or is a member of."""
+
     serializer_class = BoardSerializer
     queryset = Board.objects.all()
 
@@ -50,6 +52,8 @@ class BoardViewSet(viewsets.ModelViewSet):
 
 
 class EmailCheckView(APIView):
+    """Look up a user by exact email address."""
+
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -65,6 +69,8 @@ class EmailCheckView(APIView):
 
 
 class TaskViewSet(viewsets.ModelViewSet):
+    """Create/update/delete tasks; no list/retrieve action, those aren't in the spec."""
+
     serializer_class = TaskSerializer
     queryset = Task.objects.all()
 
@@ -78,6 +84,8 @@ class TaskViewSet(viewsets.ModelViewSet):
 
 
 class AssignedToMeView(generics.ListAPIView):
+    """List tasks where the requesting user is the assignee."""
+
     serializer_class = TaskSerializer
     permission_classes = [IsAuthenticated]
 
@@ -86,6 +94,8 @@ class AssignedToMeView(generics.ListAPIView):
 
 
 class ReviewingView(generics.ListAPIView):
+    """List tasks where the requesting user is the reviewer."""
+
     serializer_class = TaskSerializer
     permission_classes = [IsAuthenticated]
 
@@ -94,6 +104,8 @@ class ReviewingView(generics.ListAPIView):
 
 
 class CommentListCreateView(generics.ListCreateAPIView):
+    """List and create comments for a single task."""
+
     serializer_class = CommentSerializer
     permission_classes = [IsAuthenticated, IsBoardMemberForComment]
 
@@ -105,6 +117,8 @@ class CommentListCreateView(generics.ListCreateAPIView):
 
 
 class CommentDeleteView(generics.DestroyAPIView):
+    """Delete a single comment; only the comment's author is allowed."""
+
     queryset = Comment.objects.all()
     permission_classes = [IsAuthenticated, IsCommentAuthor]
     lookup_url_kwarg = "comment_id"

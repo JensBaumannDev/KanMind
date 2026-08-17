@@ -8,6 +8,7 @@ from .serializers import LoginSerializer, RegistrationSerializer
 
 
 def build_auth_response(user, status_code):
+    """Build the {token, fullname, email, user_id} response shared by registration and login."""
     token, _ = Token.objects.get_or_create(user=user)
     return Response(
         {
@@ -21,6 +22,8 @@ def build_auth_response(user, status_code):
 
 
 class RegistrationView(generics.CreateAPIView):
+    """Create a new user account and return an auth token."""
+
     serializer_class = RegistrationSerializer
     permission_classes = [AllowAny]
 
@@ -32,6 +35,8 @@ class RegistrationView(generics.CreateAPIView):
 
 
 class LoginView(APIView):
+    """Authenticate a user by email/password and return an auth token."""
+
     permission_classes = [AllowAny]
 
     def post(self, request):
