@@ -1,29 +1,32 @@
-from rest_framework import viewsets, generics
-from kanban_app.models import Board, Task, Comment
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.views import APIView
 from django.contrib.auth.models import User
-from rest_framework.response import Response
 from django.db.models import Q
-from .serializers import (
-    BoardSerializer,
-    BoardDetailSerializer,
-    BoardUpdateSerializer,
-    TaskSerializer,
-    CommentSerializer,
-)
+from rest_framework import generics, viewsets
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from kanban_app.models import Board, Comment, Task
+
 from .permissions import (
-    IsBoardMember,
-    IsBoardOwner,
-    IsBoardMemberForTask,
     CanDeleteTask,
+    IsBoardMember,
     IsBoardMemberForComment,
+    IsBoardMemberForTask,
+    IsBoardOwner,
     IsCommentAuthor,
+)
+from .serializers import (
+    BoardDetailSerializer,
+    BoardSerializer,
+    BoardUpdateSerializer,
+    CommentSerializer,
+    TaskSerializer,
 )
 
 
 class BoardViewSet(viewsets.ModelViewSet):
     serializer_class = BoardSerializer
+    queryset = Board.objects.all()
 
     def get_queryset(self):
         return Board.objects.filter(
