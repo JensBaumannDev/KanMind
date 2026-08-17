@@ -1,5 +1,5 @@
-from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
+from django.contrib.auth.models import User
 from rest_framework import serializers
 
 
@@ -64,10 +64,9 @@ class LoginSerializer(serializers.Serializer):
             request=self.context.get("request"), username=email, password=password
         )
 
+        # authenticate() already rejects inactive users, returning None for them
         if not user:
             raise serializers.ValidationError("Invalid email or password.")
-        if not user.is_active:
-            raise serializers.ValidationError("The user is currently deactivated.")
 
         data["user"] = user
         return data
