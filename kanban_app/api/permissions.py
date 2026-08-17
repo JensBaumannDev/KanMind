@@ -5,6 +5,7 @@ from kanban_app.models import Board, Task
 
 
 class IsBoardMember(BasePermission):
+    """Allow board members and the board owner."""
 
     def has_object_permission(self, request, view, obj):
         if request.user in obj.members.all() or request.user == obj.owner:
@@ -13,6 +14,7 @@ class IsBoardMember(BasePermission):
 
 
 class IsBoardOwner(BasePermission):
+    """Allow only the board owner."""
 
     def has_object_permission(self, request, view, obj):
         if request.user == obj.owner:
@@ -21,6 +23,7 @@ class IsBoardOwner(BasePermission):
 
 
 class IsBoardMemberForTask(BasePermission):
+    """Require board membership: from request data on create, from the task's board otherwise."""
 
     def has_permission(self, request, view):
         if view.action != "create":
@@ -39,6 +42,7 @@ class IsBoardMemberForTask(BasePermission):
 
 
 class CanDeleteTask(BasePermission):
+    """Allow only the task's creator or the board owner to delete it."""
 
     def has_object_permission(self, request, view, obj):
         if request.user == obj.created_by or request.user == obj.board.owner:
@@ -47,6 +51,7 @@ class CanDeleteTask(BasePermission):
 
 
 class IsBoardMemberForComment(BasePermission):
+    """Require membership on the board the task (from the URL) belongs to."""
 
     def has_permission(self, request, view):
         task = Task.objects.filter(id=view.kwargs.get("task_id")).first()
@@ -58,6 +63,7 @@ class IsBoardMemberForComment(BasePermission):
 
 
 class IsCommentAuthor(BasePermission):
+    """Allow only the comment's own author."""
 
     def has_object_permission(self, request, view, obj):
         if request.user == obj.author:
