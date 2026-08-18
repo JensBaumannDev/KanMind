@@ -21,6 +21,7 @@ local_settings.py
 # Environment variables / secrets
 .env
 .env.*
+!.env.example
 
 # Editors / IDEs
 .vscode/

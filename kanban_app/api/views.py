@@ -31,10 +31,12 @@ class BoardViewSet(viewsets.ModelViewSet):
     queryset = Board.objects.all()
 
     def get_queryset(self):
-        """Restrict boards to ones the requesting user owns or is a member of."""
+        """Restrict the list view; detail actions rely on object-level permissions instead."""
+        if self.action != "list":
+            return Board.objects.all()
         return Board.objects.filter(
             Q(members__id=self.request.user.id) | Q(owner__id=self.request.user.id)
-        )
+        ).distinct()
 
     def perform_create(self, serializer):
         """Set the requesting user as the board's owner."""
