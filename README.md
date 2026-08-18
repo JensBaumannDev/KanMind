@@ -50,7 +50,7 @@ cd KanMind
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
-echo SECRET_KEY=your-own-secret-key > .env
+cp .env.example .env
 python manage.py migrate
 python manage.py runserver
 ```
@@ -85,13 +85,13 @@ pip install -r requirements.txt
 
 **4. Set up environment variables**
 
-Create a `.env` file in the project root:
+Copy the example file and fill in your own secret key:
 
-```
-SECRET_KEY=your-own-secret-key-here
+```bash
+cp .env.example .env
 ```
 
-Generate one however you like, e.g. with:
+Generate a key however you like, e.g. with:
 
 ```bash
 python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
